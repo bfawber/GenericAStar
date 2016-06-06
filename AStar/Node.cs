@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace AStar
 {
-    class Node<T>
+    class Node<T> : IEquatable<Node<T>>
     {
         public int g { get; set; }
         public int h { get; set; }
         public int f { get; set; }
+        public int locationX { get; set; }
+        public int locationY { get; set; }
 
         public List<Node<T>> Children;
 
@@ -46,5 +48,18 @@ namespace AStar
             return new Node<T>();
         }
 
+        public bool Equals(Node<T> other)
+        {
+            if(other.locationX == this.locationX && other.locationY == this.locationY)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void printNode()
+        {
+            Console.WriteLine("( " + this.locationX + ", " + this.locationY + ")");
+        }
     }
 }

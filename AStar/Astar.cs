@@ -8,13 +8,13 @@ namespace AStar
 {
     class Astar<T>
     {
-        private Func<Node<T>, int> hueristic;
+        private Func<Node<T>, Node<T>, int> hueristic;
         private Action<Node<T>> populateChildren;
 
         private List<Node<T>> open;
         private List<Node<T>> closed;
 
-        public Astar(Func<Node<T>, int> hueristic, Action<Node<T>> populateChildren)
+        public Astar(Func<Node<T>, Node<T>, int> hueristic, Action<Node<T>> populateChildren)
         {
             this.hueristic = hueristic;
             this.populateChildren = populateChildren;
@@ -27,7 +27,8 @@ namespace AStar
             List<Node<T>> path = new List<Node<T>>();
 
             start.g = 0;
-            start.h = hueristic(start);
+            start.h = hueristic(start, goal);
+            start.f = start.g + start.h;
             open.Add(start);
 
             Node<T> n;
@@ -37,7 +38,7 @@ namespace AStar
                 n = removeLowestF(open);
                 if (n.Equals(goal))
                 {
-                    return path;
+                    return getPath(n);
                 }
                 closed.Add(n);
 
@@ -50,13 +51,14 @@ namespace AStar
                     {
                         child.Parent = n;
                         child.g = n.g + 1;
-                        child.h = hueristic(n);
+                        child.h = hueristic(n, goal);
+                        child.f = child.g + child.h;
                         open.Add(child);
                     }
                 }
             }
 
-            return path;
+            return null;
         }
 
         private Node<T> removeLowestF(List<Node<T>> nodes)
@@ -73,6 +75,22 @@ namespace AStar
 
             nodes.Remove(lowestF);
             return lowestF;
+        }
+
+        private List<Node<T>> getPath(Node<T> goal)
+        {
+            List<Node<T>> path = new List<Node<T>>();
+            Node<T> curr = goal;
+
+            while(curr.Parent != null)
+            {
+                path.Add(curr.Parent);
+                curr = curr.Parent;
+            }
+
+            path.Reverse();
+
+            return path;
         }
     }
 }
