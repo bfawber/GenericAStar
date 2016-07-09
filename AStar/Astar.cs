@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using HTable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,14 +12,16 @@ namespace AStar
         private Func<Node<T>, Node<T>, int> hueristic;
         private Action<Node<T>> populateChildren;
 
-        private List<Node<T>> open;
+        // TODO: Change this to a Map of f value -> node
+        //private List<Node<T>> open;
+        private HTbl<int, Node<T>> open;
         private List<Node<T>> closed;
 
         public Astar(Func<Node<T>, Node<T>, int> hueristic, Action<Node<T>> populateChildren)
         {
             this.hueristic = hueristic;
             this.populateChildren = populateChildren;
-            this.open = new List<Node<T>>();
+            this.open = new HTbl<int, Node<T>>();
             this.closed = new List<Node<T>>();
         }
 
@@ -29,7 +32,7 @@ namespace AStar
             start.g = 0;
             start.h = hueristic(start, goal);
             start.f = start.g + start.h;
-            open.Add(start);
+            open.Push(start.f, start);
 
             Node<T> n;
 
@@ -53,7 +56,7 @@ namespace AStar
                         child.g = n.g + 1;
                         child.h = hueristic(n, goal);
                         child.f = child.g + child.h;
-                        open.Add(child);
+                        open.Push(child.f, child);
                     }
                 }
             }
@@ -75,6 +78,17 @@ namespace AStar
 
             nodes.Remove(lowestF);
             return lowestF;
+        }
+
+        private Node<T> removeLowestF(HTbl<int, Node<T>> nodes)
+        {
+            Node<T> node = nodes.Pop(0);
+            for(int i = 0; node == null; i++)
+            {
+                node = nodes.Pop(i);
+            }
+
+            return node;
         }
 
         private List<Node<T>> getPath(Node<T> goal)
